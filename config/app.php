@@ -16,7 +16,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
-
+    'GOOGLE_APPLICATION_CREDENTIALS' => env(base_path() . 'GOOGLE_APPLICATION_CREDENTIALS'),
     /*
     |--------------------------------------------------------------------------
     | Application Environment
