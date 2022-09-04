@@ -142,8 +142,16 @@ class ImageReportController extends Controller
     public function destroy($id)
     {
         $imageModerator = ImageReport::find($id);
-        $imageModerator->delete();
+        $imageModerator->forceDelete();
 
         return $this->success([], "image destroyed");
+    }
+
+    public function archive($id)
+    {
+        $imageModerator = ImageReport::find($id);
+        $imageModerator->delete();
+
+        return $this->success([], "image archived");
     }
 }

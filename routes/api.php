@@ -24,3 +24,5 @@ Route::post('/report-image', [\App\Http\Controllers\ImageReportController::class
 
 Route::delete('/destroy-image-report/{id}', [\App\Http\Controllers\ImageReportController::class, 'destroy'])->name('destroy-image');
 
+Route::delete('/archive-image-report/{id}', [\App\Http\Controllers\ImageReportController::class, 'archive'])->name('archive-image');
+
