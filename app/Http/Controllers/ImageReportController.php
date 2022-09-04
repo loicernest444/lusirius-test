@@ -43,8 +43,6 @@ class ImageReportController extends Controller
         $result = $vision->annotate($image);
 
         $safeSearch = $result->safeSearch();
-        unlink(storage_path('app/public/temp_images/' . $imageName));
-
         
         foreach ($safeSearch->info() as $key => $value) {
             # code...
@@ -68,23 +66,53 @@ class ImageReportController extends Controller
     public function reportImage(Request $request){
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',
-            'image' => 'required|max:10000|mimes:png,jpg,jpeg'
+            'image' => 'required',
+            'callback' => 'sometimes|url'
         ]);
 
         if($validator->fails()){
             return $this->error('Error', Response::HTTP_UNPROCESSABLE_ENTITY, $validator->errors());
         }
-        $imgName = $request->user_id . date('Y-m-d') . time() . '-' . $request->image->getClientOriginalName();
+        if($request->hasFile('image')){
+            $imgName = $request->user_id . '-'. date('Y-m-d') . time() . '-' . $request->image->getClientOriginalName();
+            
+            $request->image->storeAs('temp_images', $imgName, 'public');
+        } else {
+            try {
+                $b64image = base64_encode(file_get_contents($request->image));
+            } catch (\Exception $ex) {
+                if(str_contains($ex, "Invalid argument")){
+                    $b64image = $request->image;
+                }
+            } catch(\Exception $ex1){
+                throw $ex1;
+            }
+            
+            $image_type = '.png';
+
+            // preserve file extension if it's possible
+            if(str_contains($b64image, ';base64,')){
+                $image_parts=explode(";base64,",$b64image);
+                $image_base64=base64_decode($image_parts[1]);
+                if(str_contains($b64image, 'image/jpeg')){
+                    $image_type = '.jpeg';
+                }elseif(str_contains($b64image, 'image/jpg')){
+                    $image_type = '.jpg';
+                }
+            }else {
+                $image_base64=base64_decode($b64image);
+            }
+            
+            $imgName = $request->user_id . '-'. date('Y-m-d') . time() . $image_type;
+            $file= storage_path('app/public/temp_images/') . $imgName;
+            file_put_contents($file,$image_base64);
+        }
         
-        $request->image->storeAs('temp_images', $imgName, 'public');
-
         $probabilities = $this->calculateSensitivity($imgName);
-
-        // unlink(storage_path('app/public/temp_images/' . $request->image->getClientOriginalName()));
-
         
         $imageModerator = ImageReport::create([
             'user_id' => $validator->validated()['user_id'],
+            'callback' => $validator->validated()['callback'] ?? null,
             'adult' => $probabilities['adult'],
             'spoof' => $probabilities['spoof'],
             'medical' => $probabilities['medical'],
@@ -92,11 +120,17 @@ class ImageReportController extends Controller
             'racy' => $probabilities['racy'],
             'probability' => $probabilities['probability'],
         ]);
-
-        $imageModerator
+        if($request->hasFile('image')){
+            $imageModerator
                 ->addMediaFromRequest('image')
                 ->toMediaCollection('image');
-
+            unlink(storage_path('app/public/temp_images/' . $imgName));
+        }else{
+            $imageModerator
+                ->addMedia(storage_path('app/public/temp_images/') . $imgName)
+                ->toMediaCollection('image');
+        }
+        
         return $this->success($imageModerator, "saved image probabilities");
     }
 
