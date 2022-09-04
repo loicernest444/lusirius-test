@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::table('image_reports', function (Blueprint $table) {
             $table->string('callback')->nullable();
             $table->enum('probability', ['HIGH', 'MEDIUM', 'LOW', 'VERY_LOW']);
-            $table->boolean('approved')->default(false);
+            $table->boolean('approved')->nullable();
         });
     }
 

@@ -26,3 +26,5 @@ Route::delete('/destroy-image-report/{id}', [\App\Http\Controllers\ImageReportCo
 
 Route::delete('/archive-image-report/{id}', [\App\Http\Controllers\ImageReportController::class, 'archive'])->name('archive-image');
 
+Route::put('/approve-report/{id}', [\App\Http\Controllers\ImageReportController::class, 'approveOrRejectReport'])->name('approve');
+

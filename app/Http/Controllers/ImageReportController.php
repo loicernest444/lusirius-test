@@ -101,6 +101,35 @@ class ImageReportController extends Controller
     }
 
     /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function approveOrRejectReport(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'approve' => 'required|boolean'
+        ]);
+
+        if($validator->fails()){
+            return $this->error('Error', Response::HTTP_UNPROCESSABLE_ENTITY, $validator->errors());
+        }
+        $imageReport = ImageReport::findOrFail($id);
+
+        $imageReport->update([
+            'approved' => $validator->validated()['approve']
+        ]);
+
+        if(!$validator->validated()['approve']){
+            $imageReport->delete();
+            return $this->success([], "image rejected!");
+        }
+
+        return $this->success($imageReport, "image approved!");
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -142,16 +171,16 @@ class ImageReportController extends Controller
      */
     public function destroy($id)
     {
-        $imageModerator = ImageReport::find($id);
-        $imageModerator->forceDelete();
+        $imageReport = ImageReport::findOrFail($id);
+        $imageReport->forceDelete();
 
         return $this->success([], "image destroyed");
     }
 
     public function archive($id)
     {
-        $imageModerator = ImageReport::find($id);
-        $imageModerator->delete();
+        $imageReport = ImageReport::find($id);
+        $imageReport->delete();
 
         return $this->success([], "image archived");
     }
