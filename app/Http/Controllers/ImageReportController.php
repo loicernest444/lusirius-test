@@ -107,28 +107,46 @@ class ImageReportController extends Controller
             $file= storage_path('app/public/temp_images/') . $imgName;
             file_put_contents($file,$image_base64);
         }
+
+        try{
+            $probabilities = $this->calculateSensitivity($imgName);
+        }catch(\Exception $ex){
+            
+        }
+
+        if(isset($probabilities) && is_array($probabilities)){
+            $imageModerator = ImageReport::create([
+                'user_id' => $validator->validated()['user_id'],
+                'callback' => $validator->validated()['callback'] ?? null,
+                'adult' => $probabilities['adult'],
+                'spoof' => $probabilities['spoof'],
+                'medical' => $probabilities['medical'],
+                'violence' => $probabilities['violence'],
+                'racy' => $probabilities['racy'],
+                'probability' => $probabilities['probability'],
+                'evaluated' => true
+            ]);
+        }else{
+            $imageModerator = ImageReport::create([
+                'user_id' => $validator->validated()['user_id'],
+                'callback' => $validator->validated()['callback'] ?? null,
+                'evaluated' => false
+            ]);
+        }
         
-        $probabilities = $this->calculateSensitivity($imgName);
-        
-        $imageModerator = ImageReport::create([
-            'user_id' => $validator->validated()['user_id'],
-            'callback' => $validator->validated()['callback'] ?? null,
-            'adult' => $probabilities['adult'],
-            'spoof' => $probabilities['spoof'],
-            'medical' => $probabilities['medical'],
-            'violence' => $probabilities['violence'],
-            'racy' => $probabilities['racy'],
-            'probability' => $probabilities['probability'],
-        ]);
         if($request->hasFile('image')){
             $imageModerator
                 ->addMediaFromRequest('image')
                 ->toMediaCollection('image');
-            unlink(storage_path('app/public/temp_images/' . $imgName));
         }else{
             $imageModerator
                 ->addMedia(storage_path('app/public/temp_images/') . $imgName)
                 ->toMediaCollection('image');
+        }
+        try {
+            unlink(storage_path('app/public/temp_images/' . $imgName));
+        } catch (\Throwable $th) {
+            //throw $th;
         }
         
         return $this->success($imageModerator, "saved image probabilities");
