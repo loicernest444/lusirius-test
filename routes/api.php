@@ -28,3 +28,5 @@ Route::delete('/archive-image-report/{id}', [\App\Http\Controllers\ImageReportCo
 
 Route::put('/approve-report/{id}', [\App\Http\Controllers\ImageReportController::class, 'approveOrRejectReport'])->name('approve');
 
+Route::get('/reevaluate-report/{id}', [\App\Http\Controllers\ImageReportController::class, 'reevaluateExistingReport'])->name('reevaluate');
+

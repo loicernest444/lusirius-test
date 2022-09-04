@@ -152,6 +152,52 @@ class ImageReportController extends Controller
         return $this->success($imageModerator, "saved image probabilities");
     }
 
+    public function reevaluateExistingReport($id){
+        $imageReport = ImageReport::findOrFail($id);
+        if (!Storage::exists('/temp_images')) {
+            Storage::makeDirectory('temp_images');
+        }
+        $ext = pathinfo($imageReport->image, PATHINFO_EXTENSION);
+        $mediaItems = $imageReport->getFirstMedia('image');
+        $fullPathOnDisk = $mediaItems->getPath();
+        // $b64image = base64_encode(file_get_contents($fullPathOnDisk));
+        // dd($fullPathOnDisk);
+        $imgName = date('Y-m-d') . time() . '.' . $ext;
+        $file= storage_path('app/public/temp_images/') . $imgName;
+
+        try{
+            copy($fullPathOnDisk, $file);
+        }catch(\Exception $copy){
+            return $this->error("Sorry! We canot evaluate right now, please try again later.", Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
+        try{
+            $probabilities = $this->calculateSensitivity($imgName);
+        }catch(\Exception $ex){
+            return $this->error("Sorry! We canot evaluate right now, please try again later.", Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+
+        if(isset($probabilities) && is_array($probabilities)){
+            $imageReport->update([
+                'adult' => $probabilities['adult'],
+                'spoof' => $probabilities['spoof'],
+                'medical' => $probabilities['medical'],
+                'violence' => $probabilities['violence'],
+                'racy' => $probabilities['racy'],
+                'probability' => $probabilities['probability'],
+                'evaluated' => true
+            ]);
+        }
+
+        try {
+            unlink($file);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+
+        return $this->success($imageReport, "report evaluated!!!");
+    }
+
     /**
      * Update the specified resource in storage.
      *
