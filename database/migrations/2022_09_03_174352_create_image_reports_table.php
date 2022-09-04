@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('image_moderators', function (Blueprint $table) {
+        Schema::create('image_reports', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->enum('adult', ['UNKNOWN', 'VERY_UNLIKELY', 'UNLIKELY', 'POSSIBLE', 'LIKELY', 'VERY_LIKELY']);
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('image_moderators');
+        Schema::dropIfExists('image_reports');
     }
 };

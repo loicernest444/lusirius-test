@@ -18,7 +18,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/images', [\App\Http\Controllers\ImageModeratorController::class, 'index'])->name('images');
+Route::get('/images', [\App\Http\Controllers\ImageReportController::class, 'index'])->name('images');
 
-Route::post('/report-image', [\App\Http\Controllers\ImageModeratorController::class, 'reportImage'])->name('report-image');
+Route::post('/report-image', [\App\Http\Controllers\ImageReportController::class, 'reportImage'])->name('report-image');
+
+Route::delete('/destroy-image-report/{id}', [\App\Http\Controllers\ImageReportController::class, 'destroy'])->name('destroy-image');
 

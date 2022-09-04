@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ImageModerator;
+
+use App\Models\ImageReport;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Google\Cloud\Vision\V1\Feature\Type;
@@ -14,7 +15,7 @@ use Google\Cloud\Storage\StorageClient;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 
-class ImageModeratorController extends Controller
+class ImageReportController extends Controller
 {
     use ApiResponser;
     /**
@@ -24,7 +25,7 @@ class ImageModeratorController extends Controller
      */
     public function index()
     {
-        $imageModerators = ImageModerator::all();
+        $imageModerators = ImageReport::all();
 
         return $this->success($imageModerators, "images");
     }
@@ -82,7 +83,7 @@ class ImageModeratorController extends Controller
         // unlink(storage_path('app/public/temp_images/' . $request->image->getClientOriginalName()));
 
         
-        $imageModerator = ImageModerator::create([
+        $imageModerator = ImageReport::create([
             'user_id' => $validator->validated()['user_id'],
             'adult' => $probabilities['adult'],
             'spoof' => $probabilities['spoof'],
@@ -140,6 +141,9 @@ class ImageModeratorController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $imageModerator = ImageReport::find($id);
+        $imageModerator->delete();
+
+        return $this->success([], "image destroyed");
     }
 }
