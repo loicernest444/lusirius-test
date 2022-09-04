@@ -46,23 +46,23 @@ class ImageReportController extends Controller
         unlink(storage_path('app/public/temp_images/' . $imageName));
 
         
-        // foreach ($safeSearch->info() as $key => $value) {
-        //     # code...
-        //     $values[] = $value;
-        // }
-        // $probability = 'VERY_LOW';
-        // if(in_array(['VERY_LIKELY', 'LIKELY', 'POSSIBLE'], $values)){
-        //     $probability = 'LOW';
-        // }elseif(in_array(['VERY_LIKELY', 'LIKELY'], $values)){
-        //     $probability = 'MEDIUM';
-        // }elseif(in_array(['VERY_LIKELY'], $values)){
-        //     $probability = 'HIGH';
-        // }else{
-        //     $probability = 'VERY_LOW';
-        // }
+        foreach ($safeSearch->info() as $key => $value) {
+            # code...
+            $values[] = $value;
+        }
+        $probability = 'VERY_LOW';
+        if(in_array(['VERY_LIKELY', 'LIKELY', 'POSSIBLE'], $values)){
+            $probability = 'LOW';
+        }elseif(in_array(['VERY_LIKELY', 'LIKELY'], $values)){
+            $probability = 'MEDIUM';
+        }elseif(in_array(['VERY_LIKELY'], $values)){
+            $probability = 'HIGH';
+        }else{
+            $probability = 'VERY_LOW';
+        }
         
         
-        return $safeSearch->info();
+        return array_merge($safeSearch->info(), ['probability' => $probability]);
     }
 
     public function reportImage(Request $request){
@@ -90,6 +90,7 @@ class ImageReportController extends Controller
             'medical' => $probabilities['medical'],
             'violence' => $probabilities['violence'],
             'racy' => $probabilities['racy'],
+            'probability' => $probabilities['probability'],
         ]);
 
         $imageModerator

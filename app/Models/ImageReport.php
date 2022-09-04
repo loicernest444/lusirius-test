@@ -17,7 +17,7 @@ class ImageReport extends Model implements HasMedia
 
     protected $appends = ['image'];
 
-    protected $fillable = ['user_id', 'adult', 'spoof', 'medical', 'violence', 'racy'];
+    protected $fillable = ['user_id', 'adult', 'spoof', 'medical', 'violence', 'racy', 'probability'];
 
     protected $hidden = ['media'];
 
