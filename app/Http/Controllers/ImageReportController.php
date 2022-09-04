@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Google\Cloud\Storage\StorageClient;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Http;
 
 class ImageReportController extends Controller
 {
@@ -126,6 +127,7 @@ class ImageReportController extends Controller
                 'probability' => $probabilities['probability'],
                 'evaluated' => true
             ]);
+
         }else{
             $imageModerator = ImageReport::create([
                 'user_id' => $validator->validated()['user_id'],
@@ -160,8 +162,6 @@ class ImageReportController extends Controller
         $ext = pathinfo($imageReport->image, PATHINFO_EXTENSION);
         $mediaItems = $imageReport->getFirstMedia('image');
         $fullPathOnDisk = $mediaItems->getPath();
-        // $b64image = base64_encode(file_get_contents($fullPathOnDisk));
-        // dd($fullPathOnDisk);
         $imgName = date('Y-m-d') . time() . '.' . $ext;
         $file= storage_path('app/public/temp_images/') . $imgName;
 
@@ -219,10 +219,25 @@ class ImageReportController extends Controller
             'approved' => $validator->validated()['approve']
         ]);
 
-        if(!$validator->validated()['approve']){
-            $imageReport->delete();
-            return $this->success([], "image rejected!");
+        if(isset($imageReport['callback'])){
+            $guzzleRequest = Http::retry(3, 1000)->post($validator->validated()['callback'], [
+                'adult' => $imageReport['adult'],
+                'spoof' => $imageReport['spoof'],
+                'medical' => $imageReport['medical'],
+                'violence' => $imageReport['violence'],
+                'racy' => $imageReport['racy'],
+                'probability' => $imageReport['probability'],
+                'approve' => $imageReport['approve']
+            ]);
+            //$response = $guzzleRequest->json();
         }
+
+        // if(!$validator->validated()['approve']){
+        //     $imageReport->delete();
+        //     return $this->success([], "image rejected!");
+        // }
+
+        $imageReport->delete();
 
         return $this->success($imageReport, "image approved!");
     }

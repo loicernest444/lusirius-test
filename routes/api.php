@@ -30,3 +30,5 @@ Route::put('/approve-report/{id}', [\App\Http\Controllers\ImageReportController:
 
 Route::get('/reevaluate-report/{id}', [\App\Http\Controllers\ImageReportController::class, 'reevaluateExistingReport'])->name('reevaluate');
 
+// Route::get('/report-callback', [\App\Http\Controllers\ImageReportController::class, 'reevaluateExistingReport'])->name('reevaluate');
+
