@@ -28,7 +28,7 @@ class ImageReportController extends Controller
     {
         $imageModerators = ImageReport::all();
 
-        return $this->success($imageModerators, "images");
+        return $this->success($imageModerators, "reports");
     }
 
     public function calculateSensitivity($imageName){
@@ -237,7 +237,7 @@ class ImageReportController extends Controller
         //     return $this->success([], "image rejected!");
         // }
 
-        $imageReport->delete();
+        // $imageReport->delete();
 
         return $this->success($imageReport, "image approved!");
     }
