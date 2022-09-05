@@ -59,9 +59,19 @@ class ImageReportController extends Controller
         }else{
             $probability = 'VERY_LOW';
         }
+        // 'VERY_UNLIKELY', 'UNLIKELY', 'POSSIBLE', 'LIKELY', 'VERY_LIKELY'
         
-        
-        return array_merge($safeSearch->info(), ['probability' => $probability]);
+        return array_merge($safeSearch->info(), ['probability' => $probability, 'probability_level' => $this->calculateProbabilityLevel($probability)]);
+    }
+    
+    public function calculateProbabilityLevel($probability){
+        if($probability == 'VERY_UNLIKELY') $probability_level = 1/5;
+        elseif($probability == 'UNLIKELY') $probability_level = 2/5;
+        elseif($probability == 'POSSIBLE') $probability_level = 3/5;
+        elseif($probability == 'LIKELY') $probability_level = 4/5;
+        elseif($probability == 'VERY_LIKELY') $probability_level = 0.9999;
+
+        return $probability_level;
     }
 
     public function reportImage(Request $request){
@@ -125,6 +135,7 @@ class ImageReportController extends Controller
                 'violence' => $probabilities['violence'],
                 'racy' => $probabilities['racy'],
                 'probability' => $probabilities['probability'],
+                'probability_level' => $probabilities['probability_level'],
                 'evaluated' => true
             ]);
 
@@ -185,6 +196,7 @@ class ImageReportController extends Controller
                 'violence' => $probabilities['violence'],
                 'racy' => $probabilities['racy'],
                 'probability' => $probabilities['probability'],
+                'probability_level' => $probabilities['probability_level'],
                 'evaluated' => true
             ]);
         }
@@ -227,6 +239,7 @@ class ImageReportController extends Controller
                 'violence' => $imageReport['violence'],
                 'racy' => $imageReport['racy'],
                 'probability' => $imageReport['probability'],
+                'probability_level' => $imageReport['probability_level'],
                 'approve' => $imageReport['approve']
             ]);
             //$response = $guzzleRequest->json();
