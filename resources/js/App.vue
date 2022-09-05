@@ -1,14 +1,13 @@
 <template>
   <div class="px-6 py-3">
     <Table @remove="remove" :reports="reports"></Table>
-    <div class="text-red-500">
-      How To Install Vue 3 in Laravel 9 with Vite - TechvBlogs
-    </div>
+    <Loader v-if="isLoading"></Loader>
   </div>
 </template>
 
 <script>
-import Table from "../components/Table.vue";
+import Table from "./components/Table.vue";
+import Loader from "./components/Loader.vue";
 export default {
   setup() {
     return {
@@ -22,6 +21,12 @@ export default {
   },
   components: {
     Table,
+    Loader,
+  },
+  computed: {
+    isLoading() {
+      return this.$store.getters.isLoading;
+    },
   },
   methods: {
     remove($e) {

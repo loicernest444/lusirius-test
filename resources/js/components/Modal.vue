@@ -2,7 +2,7 @@
   <div
     id="editUserModal"
     tabindex="-1"
-    class="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center p-4 w-full md:inset-0 h-modal md:h-full flex bg-slate-500 bg-opacity-30"
+    class="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-10 justify-center items-center p-4 w-full md:inset-0 h-modal md:h-full flex bg-slate-500 bg-opacity-30"
     aria-modal="true"
     role="dialog"
   >

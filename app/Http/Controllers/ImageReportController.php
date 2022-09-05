@@ -61,15 +61,24 @@ class ImageReportController extends Controller
         }
         // 'VERY_UNLIKELY', 'UNLIKELY', 'POSSIBLE', 'LIKELY', 'VERY_LIKELY'
         
-        return array_merge($safeSearch->info(), ['probability' => $probability, 'probability_level' => $this->calculateProbabilityLevel($probability)]);
+        return array_merge($safeSearch->info(), ['probability' => $probability, 'probability_level' => $this->calculateProbabilityLevel($values)]);
     }
     
-    public function calculateProbabilityLevel($probability){
-        if($probability == 'VERY_UNLIKELY') $probability_level = 1/5;
-        elseif($probability == 'UNLIKELY') $probability_level = 2/5;
-        elseif($probability == 'POSSIBLE') $probability_level = 3/5;
-        elseif($probability == 'LIKELY') $probability_level = 4/5;
-        elseif($probability == 'VERY_LIKELY') $probability_level = 0.9999;
+    public function calculateProbabilityLevel($values){
+        $prob = 1;
+        foreach ($$values as $key => $value) {
+            $prob *= $this->calculateIndividualProbabilityLevel($value);
+        }
+        
+        return $prob;
+    }
+    public function calculateIndividualProbabilityLevel($value){
+        if($value == 'VERY_UNLIKELY') $probability_level = 1/5;
+        elseif($value == 'UNLIKELY') $probability_level = 2/5;
+        elseif($value == 'POSSIBLE') $probability_level = 3/5;
+        elseif($value == 'LIKELY') $probability_level = 4/5;
+        elseif($value == 'VERY_LIKELY') $probability_level = 0.9999;
+        else $probability_level = 0.000001;
 
         return $probability_level;
     }

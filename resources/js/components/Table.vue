@@ -128,7 +128,7 @@
             <th scope="col" class="py-3 px-6">racy</th>
             <th scope="col" class="py-3 px-6">evaluated</th>
             <th scope="col" class="py-3 px-6">approved</th>
-            <th scope="col" class="py-3 px-6">Action</th>
+            <th scope="col" class="py-3 px-6">Actions</th>
           </tr>
         </thead>
         <tbody v-if="getAllReports.length > 0">
@@ -158,7 +158,10 @@
               </div>
             </th>
             <td class="py-4 px-6">
-              {{ report.probability }}
+              <div class="flex flex-col">
+                <div>{{ report.probability }}</div>
+                <div>{{ report.probability_level }}</div>
+              </div>
             </td>
             <td class="py-4 px-6">
               {{ report.adult }}
@@ -220,7 +223,7 @@
               >Archive</a
             > -->
               <span
-                @click="(showAproveModal = true), (selectedReport = report)"
+                @click="(error = ''), (showAproveModal = true), (selectedReport = report)"
                 title="Approve or reject"
                 class="cursor-pointer"
               >
@@ -281,7 +284,9 @@
                 </svg>
               </span>
               <span
-                @click="(showArchiveModal = true), (selectedReport = report)"
+                @click="
+                  (error = ''), (showArchiveModal = true), (selectedReport = report)
+                "
                 title="Archive"
                 class="cursor-pointer"
               >
@@ -325,6 +330,37 @@
                   <g></g>
                   <g></g>
                   <g></g>
+                </svg>
+              </span>
+              <span
+                @click="(error = ''), reevaluateReport(report.id)"
+                title="reevaluate"
+                class="cursor-pointer"
+              >
+                <svg
+                  class="w-6 h-6"
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                  x="0px"
+                  y="0px"
+                  viewBox="0 0 1000 1000"
+                  enable-background="new 0 0 1000 1000"
+                  xml:space="preserve"
+                >
+                  <metadata>
+                    Svg Vector Icons : http://www.onlinewebfonts.com/icon
+                  </metadata>
+                  <g>
+                    <g>
+                      <path
+                        d="M439.5,806.8h-50.4c-145.4-23.8-256.7-150.4-256.7-302.4c0-51,13.1-98.6,35.2-140.9l37.6,52.1c27.4,37.9,86.4,27.3,98.9-17.7l71.2-256.2c9.9-35.6-16.9-70.8-53.8-70.8L65.8,71.3c-45.5,0.1-71.7,51.6-45.1,88.4l69.2,95.8C39.7,325.8,10,411.5,10,504.4c0,214.5,157.3,392.3,362.8,424c5.6,0.9,11.1,0.6,16.4-0.1v0.7h50.4c33.4,0,60.5-27.1,60.5-60.5v-1.2C500,833.9,472.9,806.8,439.5,806.8L439.5,806.8z"
+                      />
+                      <path
+                        d="M979.4,840.3l-69.2-95.8c50.1-70.2,79.8-155.9,79.8-248.8c0-214.5-157.3-392.3-362.8-424c-5.6-0.9-11.1-0.6-16.4,0.1v-0.8h-50.4c-33.4,0-60.5,27.1-60.5,60.5v1.2c0,33.4,27.1,60.5,60.5,60.5h50.4C756.2,217,867.5,343.6,867.5,495.6c0,51-13.1,98.6-35.2,140.9l-37.6-52.1c-27.3-37.9-86.4-27.3-98.9,17.7l-71.3,256.2c-9.9,35.6,16.9,70.8,53.8,70.8l255.9-0.4C979.7,928.7,1005.9,877.1,979.4,840.3L979.4,840.3z"
+                      />
+                    </g>
+                  </g>
                 </svg>
               </span>
               <span class="h-9"></span>
@@ -395,6 +431,30 @@
           </div>
         </template>
       </Modal>
+      <Modal
+        v-show="showRevaluationModal"
+        @close="showRevaluationModal = false"
+        :title="'Revaluation completed!'"
+      >
+        <template #body>
+          <div class="w-full text-center text-red-400">
+            {{ error }}
+          </div>
+        </template>
+        <template #footer>
+          <div
+            class="flex justify-center items-center p-6 space-x-2 rounded-b border-t border-gray-200 dark:border-gray-600"
+          >
+            <LoadingButton
+              @submit="showRevaluationModal = false"
+              :isLoading="false"
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              OK
+            </LoadingButton>
+          </div>
+        </template>
+      </Modal>
     </div>
   </div>
 </template>
@@ -402,6 +462,7 @@
 <script>
 import Modal from "./Modal.vue";
 import LoadingButton from "./LoadingButton.vue";
+import { mapMutations } from "vuex";
 export default {
   name: "Table",
   props: {
@@ -417,6 +478,7 @@ export default {
       showArchiveModal: false,
       isLoadingApprove: false,
       isLoadingReject: false,
+      showRevaluationModal: false,
       error: "",
     };
   },
@@ -431,6 +493,25 @@ export default {
     },
   },
   methods: {
+    ...mapMutations({
+      updateLoader: "UPDATE_LOADER",
+    }),
+    reevaluateReport(id) {
+      this.updateLoader(true);
+      this.$store
+        .dispatch("reevaluateReport", id)
+        .then((response) => {
+          this.showRevaluationModal = true;
+          this.error = "";
+          this.updateLoader(false);
+        })
+        .catch((err) => {
+          console.error("reevaluateReport error==>> ", err);
+          this.error = "Something when wrong";
+          this.showRevaluationModal = true;
+          this.updateLoader(false);
+        });
+    },
     archiveReport(id) {
       this.$store
         .dispatch("archiveReport", id)
@@ -444,7 +525,7 @@ export default {
           this.error = "Something when wrong";
         });
     },
-    async approveReport(id, approve) {
+    approveReport(id, approve) {
       this.$store
         .dispatch("approveReport", { id, approve })
         .then((response) => {
