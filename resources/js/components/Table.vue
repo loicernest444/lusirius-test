@@ -148,6 +148,7 @@
               </div>
             </td>
             <th
+              @click="(showImageModal = true), (selectedReport = report)"
               scope="row"
               class="flex items-center py-4 px-6 text-gray-900 whitespace-nowrap dark:text-white"
             >
@@ -370,6 +371,20 @@
       </table>
       <!-- modal -->
       <Modal
+        v-if="showImageModal && selectedReport"
+        @close="showImageModal = false"
+        :title="'Reported Image'"
+      >
+        <template #body>
+          <div class="w-full flex justify-center">
+            <img :src="selectedReport.image" alt="Image" />
+          </div>
+        </template>
+        <template #footer>
+          <div></div>
+        </template>
+      </Modal>
+      <Modal
         v-show="showAproveModal && selectedReport"
         @close="showAproveModal = false"
         :title="'Approve report'"
@@ -479,6 +494,7 @@ export default {
       isLoadingApprove: false,
       isLoadingReject: false,
       showRevaluationModal: false,
+      showImageModal: false,
       error: "",
     };
   },
