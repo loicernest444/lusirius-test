@@ -431,14 +431,14 @@
           >
             <LoadingButton
               @submit="showArchiveModal = false"
-              :isLoading="isLoadingReject"
+              :isLoading="isLoadingArchive"
               class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
               Cancel
             </LoadingButton>
             <LoadingButton
-              @submit="(isLoadingApprove = true), archiveReport(selectedReport.id)"
-              :isLoading="isLoadingApprove"
+              @submit="(isLoadingArchive = true), archiveReport(selectedReport.id)"
+              :isLoading="isLoadingArchive"
               class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
               Archive
@@ -495,6 +495,7 @@ export default {
       isLoadingReject: false,
       showRevaluationModal: false,
       showImageModal: false,
+      isLoadingArchive: false,
       error: "",
     };
   },
@@ -506,6 +507,20 @@ export default {
     getAllReports() {
       //final output from here
       return this.$store.getters.getReportsFormGetters;
+    },
+  },
+  watch: {
+    isLoadingApprove(newVal, old) {
+      if (newVal == true) this.updateLoader(true);
+      if (newVal == false) this.updateLoader(false);
+    },
+    isLoadingReject(newVal, old) {
+      if (newVal == true) this.updateLoader(true);
+      if (newVal == false) this.updateLoader(false);
+    },
+    isLoadingArchive(newVal, old) {
+      if (newVal == true) this.updateLoader(true);
+      if (newVal == false) this.updateLoader(false);
     },
   },
   methods: {
@@ -534,11 +549,12 @@ export default {
         .then((response) => {
           this.showArchiveModal = false;
           this.error = "";
-          this.isLoadingApprove = false;
+          this.isLoadingArchive = false;
           this.isLoadingReject = false;
         })
         .catch((err) => {
           this.error = "Something when wrong";
+          this.isLoadingArchive = false;
         });
     },
     approveReport(id, approve) {
@@ -552,6 +568,8 @@ export default {
         })
         .catch((err) => {
           this.error = "Something when wrong";
+          this.isLoadingApprove = false;
+          this.isLoadingReject = false;
         });
     },
   },
