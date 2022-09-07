@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ImageReport;
 use App\Traits\ApiResponser;
+use Error;
 use Illuminate\Http\Request;
 use Google\Cloud\Vision\V1\Feature\Type;
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
@@ -23,6 +24,28 @@ class ImageReportController extends Controller
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
+     */
+    /**
+     * @OA\Get(
+     *      path="/reports",
+     *      operationId="getReportsList",
+     *      tags={"Reports"},
+     *      summary="Get list of reports",
+     *      description="Returns list of reports",
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent(ref="#/components/schemas/ReportResource")
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     *     )
      */
     public function index()
     {
@@ -44,29 +67,39 @@ class ImageReportController extends Controller
         $result = $vision->annotate($image);
 
         $safeSearch = $result->safeSearch();
+
+        if(!isset($safeSearch)){
+            return null;
+        }
         
         foreach ($safeSearch->info() as $key => $value) {
             # code...
             $values[] = $value;
         }
         $probability = 'VERY_LOW';
-        if(in_array(['VERY_LIKELY', 'LIKELY', 'POSSIBLE'], $values)){
+        if(in_array('VERY_LIKELY', $values) 
+           && in_array('LIKELY', $values) 
+           && in_array('POSSIBLE', $values)){
             $probability = 'LOW';
-        }elseif(in_array(['VERY_LIKELY', 'LIKELY'], $values)){
+            $probability_level = 0.25;
+        }elseif(in_array('VERY_LIKELY', $values) && in_array('LIKELY', $values)){
             $probability = 'MEDIUM';
-        }elseif(in_array(['VERY_LIKELY'], $values)){
+            $probability_level = 0.50;
+        }elseif(in_array('VERY_LIKELY', $values)){
             $probability = 'HIGH';
+            $probability_level = 0.90;
         }else{
             $probability = 'VERY_LOW';
+            $probability_level = 0.10;
         }
         // 'VERY_UNLIKELY', 'UNLIKELY', 'POSSIBLE', 'LIKELY', 'VERY_LIKELY'
         
-        return array_merge($safeSearch->info(), ['probability' => $probability, 'probability_level' => $this->calculateProbabilityLevel($values)]);
+        return array_merge($safeSearch->info(), ['probability' => $probability, 'probability_level' => $probability_level]);
     }
     
     public function calculateProbabilityLevel($values){
         $prob = 1;
-        foreach ($$values as $key => $value) {
+        foreach ($values as $key => $value) {
             $prob *= $this->calculateIndividualProbabilityLevel($value);
         }
         
@@ -83,6 +116,56 @@ class ImageReportController extends Controller
         return $probability_level;
     }
 
+    /**
+     * @OA\Post(
+     *      path="/report-image",
+     *      operationId="createReport",
+     *      tags={"Reports"},
+     *      summary="Create new report",
+     *      description="Create new report",
+     * 
+     *      @OA\Parameter(
+     *          name="user_id",
+     *          description="User ID",
+     *          required=true,
+     *          in="query",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Parameter(
+     *          name="image",
+     *          description="The image to be reported (the link or byte)",
+     *          required=true,
+     *          in="query",
+     *          @OA\Schema(
+     *              type="string"
+     *          )
+     *      ),
+     *      @OA\Parameter(
+     *          name="callback",
+     *          description="The Callback endpoint use to send report result when it's available",
+     *          required=false,
+     *          in="query",
+     *          @OA\Schema(
+     *              type="url"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent(ref="#/components/schemas/StoreImageReportRequest")
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     *     )
+     */
     public function reportImage(Request $request){
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',
@@ -103,6 +186,8 @@ class ImageReportController extends Controller
             } catch (\Exception $ex) {
                 if(str_contains($ex, "Invalid argument")){
                     $b64image = $request->image;
+                }else{
+                    return $this->error('Sorry we cannot proceed your image', Response::HTTP_UNPROCESSABLE_ENTITY);
                 }
             } catch(\Exception $ex1){
                 throw $ex1;
@@ -120,18 +205,28 @@ class ImageReportController extends Controller
                     $image_type = '.jpg';
                 }
             }else {
-                $image_base64=base64_decode($b64image);
+                try {
+                    $image_base64=base64_decode($b64image);
+                } catch (\Exception $ex) {
+                    return $this->error('Sorry we cannot proceed your image', Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
+                
             }
             
             $imgName = $request->user_id . '-'. date('Y-m-d') . time() . $image_type;
             $file= storage_path('app/public/temp_images/') . $imgName;
             file_put_contents($file,$image_base64);
+            
         }
 
         try{
             $probabilities = $this->calculateSensitivity($imgName);
+            if(!is_array($probabilities)){
+                return $this->error('Sorry we cannot proceed your image', Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
         }catch(\Exception $ex){
-            
+            dd($ex);
+            return $this->error('Sorry we cannot proceed your image', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         if(isset($probabilities) && is_array($probabilities)){
@@ -193,6 +288,9 @@ class ImageReportController extends Controller
         
         try{
             $probabilities = $this->calculateSensitivity($imgName);
+            if(!is_array($probabilities)){
+                return $this->error('Sorry we cannot proceed your image', Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
         }catch(\Exception $ex){
             return $this->error("Sorry! We canot evaluate right now, please try again later.", Response::HTTP_SERVICE_UNAVAILABLE);
         }
