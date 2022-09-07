@@ -66,3 +66,7 @@ The UI is directly available on http://localhost, i have build it with vue.js 3 
 - Sort reports by decreasing probability of containing sensitive by clicking on **probability** column header
 
 ![Example Reports list](public/reports_list.png?raw=true "Example Reports list sort by decreasing probability")
+
+## Callback
+
+- Here http://localhost/api/callback-test is the callback example that i have implement, you can add it as image report callback but your endpoint must be an online endpoint.

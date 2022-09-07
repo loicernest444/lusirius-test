@@ -157,6 +157,17 @@ class ImageReport extends Model implements HasMedia
      * @var string
      */
     private $probability;
+    
+    /**
+     * @OA\Property(
+     *     title="probability_level",
+     *     description="Show the probability level (in peecentage) of image to be a sensitive content",
+     *     example="0.5"
+     * )
+     *
+     * @var string
+     */
+    private $probability_level;
 
     /**
      * @OA\Property(

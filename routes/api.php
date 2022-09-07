@@ -28,7 +28,11 @@ Route::delete('/archive-image-report/{id}', [\App\Http\Controllers\ImageReportCo
 
 Route::put('/approve-report/{id}', [\App\Http\Controllers\ImageReportController::class, 'approveOrRejectReport'])->name('approve');
 
+Route::put('/update-report-callback/{id}', [\App\Http\Controllers\ImageReportController::class, 'update'])->name('update-callback');
+
 Route::get('/reevaluate-report/{id}', [\App\Http\Controllers\ImageReportController::class, 'reevaluateExistingReport'])->name('reevaluate');
 
-// Route::get('/report-callback', [\App\Http\Controllers\ImageReportController::class, 'reevaluateExistingReport'])->name('reevaluate');
+Route::get('/callback/{id}', [\App\Http\Controllers\ImageReportController::class, 'callCallback'])->name('callback');
+
+Route::post('/callback-test', [\App\Http\Controllers\ImageReportController::class, 'callbackTester'])->name('callback-test');
 

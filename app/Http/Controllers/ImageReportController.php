@@ -420,6 +420,7 @@ class ImageReportController extends Controller
 
         if(isset($imageReport['callback'])){
             $guzzleRequest = Http::retry(3, 1000)->post($validator->validated()['callback'], [
+                'id' => $imageReport['id'],
                 'adult' => $imageReport['adult'],
                 'spoof' => $imageReport['spoof'],
                 'medical' => $imageReport['medical'],
@@ -464,6 +465,8 @@ class ImageReportController extends Controller
         //
     }
 
+
+
     /**
      * Update the specified resource in storage.
      *
@@ -471,9 +474,66 @@ class ImageReportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    /**
+     * @OA\Put(
+     *      path="/update-report-callback/{id}",
+     *      operationId="updateCallbackReport",
+     *      tags={"Reports"},
+     *      summary="Update callback endpoint",
+     *      description="Update callback endpoint. Hit this to update the image report callback endpoint.",
+     * 
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="Report ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Parameter(
+     *          name="callback",
+     *          description="callback link value",
+     *          required=true,
+     *          in="query",
+     *          
+     *          @OA\Schema(
+     *              type="string",
+     *              default="http://localhost/api/callback-test",
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent(ref="#/components/schemas/ImageReport")
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     *     )
+     */
     public function update(Request $request, $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'callback' => 'required|url'
+        ]);
+
+        if($validator->fails()){
+            return $this->error('Error', Response::HTTP_UNPROCESSABLE_ENTITY, $validator->errors());
+        }
+        $imageReport = ImageReport::find($id);
+        if(!isset($imageReport)) return $this->error("Not found", Response::HTTP_NOT_FOUND);
+
+        $imageReport->update([
+            'callback' => $validator->validated()['callback']
+        ]);
+
+        return $this->success($imageReport, "image approved!");
     }
 
     /**
@@ -482,6 +542,89 @@ class ImageReportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
+    /**
+     * @OA\Get(
+     *      path="/callback/{id}",
+     *      operationId="callbackReport",
+     *      tags={"Reports"},
+     *      summary="Callback report. Hit this to get the image report moderation by providing the report id.",
+     *      description="Callback report. Hit this to get the image report moderation by providing the report id.",
+     * 
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="Report ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent(ref="#/components/schemas/ReportCallbackResource")
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     *     )
+     */
+    public function callCallback($id)
+    {
+        $imageReport = ImageReport::find($id);
+        if(!isset($imageReport)) return $this->error("Not found", Response::HTTP_NOT_FOUND);
+        if(!isset($imageReport->callback)) return $this->error("Your entry dont have a callback endpoint.", Response::HTTP_NOT_FOUND);
+        
+        $guzzleRequest = Http::retry(3, 1000)->post($imageReport->callback, [
+            'id' => $imageReport['id'],
+            'adult' => $imageReport['adult'],
+            'spoof' => $imageReport['spoof'],
+            'medical' => $imageReport['medical'],
+            'violence' => $imageReport['violence'],
+            'racy' => $imageReport['racy'],
+            'probability' => $imageReport['probability'],
+            'probability_level' => $imageReport['probability_level'],
+            'approve' => $imageReport['approve']
+        ]);
+        $response = $guzzleRequest->json();
+
+        return $this->success($response, "Callback response");
+    }
+    
+
+    /**
+     * @OA\Post(
+     *      path="/callback-test",
+     *      operationId="callbackTester",
+     *      tags={"Reports"},
+     *      summary="Callback report test",
+     *      description="Callback report test",
+     * 
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent()
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     *     )
+     */
+    public function callbackTester()
+    {
+        return $this->success(["message" => "Congrats! You reached the callback"], "Callback endpoint reached.");
+    }
 
     /**
      * @OA\Delete(
