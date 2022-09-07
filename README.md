@@ -31,6 +31,9 @@ $ ./vendor/bin/sail artisan key:generate
 $ ./vendor/bin/sail artisan migrate
 ```
 ```php
+$ ./vendor/bin/sail artisan storage:link
+```
+```php
 $ ./vendor/bin/sail npm run dev
 ```
 to generate swagger documentation:
@@ -47,7 +50,7 @@ if apache2 is running on port 80 run ```sudo service apache2 stop``` before retr
 # **API Routes**
 ### All API routes with Schema and examples are available on http://localhost/api/docs
 
-## **UI usage**
+# **UI usage**
 The UI is directly available on http://localhost, i have build it with vue.js 3 and vuex. In the UI you have only one page where you can see the list of reports. 
 - Preview the reported image by clicking on it
 - On the probability column you have the probability of containing sensitive content
