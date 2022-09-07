@@ -90,8 +90,170 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/StoreImageReportRequest"
+                                    "$ref": "#/components/schemas/ImageReport"
                                 }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            }
+        },
+        "/reevaluate-report/{id}": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Revaluate existing report",
+                "description": "Revaluate existing report",
+                "operationId": "revaluateReport",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Report ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImageReport"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            }
+        },
+        "/approve-report/{id}": {
+            "put": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Approve report",
+                "description": "Approve report",
+                "operationId": "approveReport",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Report ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "approve",
+                        "in": "query",
+                        "description": "approval value",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImageReport"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            }
+        },
+        "/destroy-image-report/{id}": {
+            "delete": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Destroy report",
+                "description": "Destroy report",
+                "operationId": "destroyReport",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Report ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            }
+        },
+        "/archive-image-report/{id}": {
+            "delete": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Archive report",
+                "description": "Archive report",
+                "operationId": "arhiveReport",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Report ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
                             }
                         }
                     },
@@ -158,6 +320,13 @@
                 "title": "ImageReport",
                 "description": "ImageReport model",
                 "properties": {
+                    "id": {
+                        "title": "ID",
+                        "description": "ImageReport ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
                     "user_id": {
                         "title": "User ID",
                         "description": "User ID",
@@ -174,7 +343,76 @@
                     "callback": {
                         "title": "Callback",
                         "description": "The Callback endpoint use to send report result when it's available",
-                        "example": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3FX_qrHfguSoEBB293hEFgrd1rPOdTSLY2Q&usqp=CAU"
+                        "example": "http://127.0.0.1/api/reports"
+                    },
+                    "adult": {
+                        "title": "Adult",
+                        "description": "The adult probability",
+                        "type": "string",
+                        "example": "UNLIKELY"
+                    },
+                    "spoof": {
+                        "title": "spoof",
+                        "description": "The spoof probability",
+                        "type": "string",
+                        "example": "UNLIKELY"
+                    },
+                    "medical": {
+                        "title": "medical",
+                        "description": "The medical probability",
+                        "type": "string",
+                        "example": "UNLIKELY"
+                    },
+                    "violence": {
+                        "title": "violence",
+                        "description": "The violence probability",
+                        "type": "string",
+                        "example": "UNLIKELY"
+                    },
+                    "racy": {
+                        "title": "racy",
+                        "description": "The racy probability",
+                        "type": "string",
+                        "example": "UNLIKELY"
+                    },
+                    "approved": {
+                        "title": "approved",
+                        "description": "Show if the report is approved or not",
+                        "type": "string",
+                        "example": true
+                    },
+                    "evaluated": {
+                        "title": "evaluated",
+                        "description": "Show if the report is evaluated or not",
+                        "type": "string",
+                        "example": false
+                    },
+                    "probability": {
+                        "title": "probability",
+                        "description": "Show the probability of image to be a sensitive content",
+                        "type": "string",
+                        "example": "HIGH"
+                    },
+                    "created_at": {
+                        "title": "Created at",
+                        "description": "Created at",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2022-09-06 17:50:45"
+                    },
+                    "updated_at": {
+                        "title": "Updated at",
+                        "description": "Updated at",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2022-09-06 17:50:45"
+                    },
+                    "deleted_at": {
+                        "title": "Deleted at",
+                        "description": "Deleted at",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2022-09-06 17:50:45"
                     }
                 },
                 "type": "object",

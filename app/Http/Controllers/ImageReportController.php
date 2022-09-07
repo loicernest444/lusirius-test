@@ -154,7 +154,7 @@ class ImageReportController extends Controller
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation",
-     *          @OA\JsonContent(ref="#/components/schemas/StoreImageReportRequest")
+     *          @OA\JsonContent(ref="#/components/schemas/ImageReport")
      *       ),
      *      @OA\Response(
      *          response=401,
@@ -269,6 +269,39 @@ class ImageReportController extends Controller
         return $this->success($imageModerator, "saved image probabilities");
     }
 
+
+    /**
+     * @OA\Get(
+     *      path="/reevaluate-report/{id}",
+     *      operationId="revaluateReport",
+     *      tags={"Reports"},
+     *      summary="Revaluate existing report",
+     *      description="Revaluate existing report",
+     * 
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="Report ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent(ref="#/components/schemas/ImageReport")
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     *     )
+     */
     public function reevaluateExistingReport($id){
         $imageReport = ImageReport::findOrFail($id);
         if (!Storage::exists('/temp_images')) {
@@ -324,15 +357,62 @@ class ImageReportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
+    /**
+     * @OA\Put(
+     *      path="/approve-report/{id}",
+     *      operationId="approveReport",
+     *      tags={"Reports"},
+     *      summary="Approve report",
+     *      description="Approve report",
+     * 
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="Report ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Parameter(
+     *          name="approve",
+     *          description="approval value",
+     *          required=true,
+     *          in="query",
+     *          
+     *          @OA\Schema(
+     *              type="boolean",
+     *              default=false,
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent(ref="#/components/schemas/ImageReport")
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     *     )
+     */
     public function approveOrRejectReport(Request $request, $id){
-        $validator = Validator::make($request->all(), [
+        $request->approve = filter_var($request->approve, FILTER_VALIDATE_BOOLEAN);
+        
+        $validator = Validator::make(['approve' => filter_var($request->approve, FILTER_VALIDATE_BOOLEAN)], [
             'approve' => 'required|boolean'
         ]);
 
         if($validator->fails()){
             return $this->error('Error', Response::HTTP_UNPROCESSABLE_ENTITY, $validator->errors());
         }
-        $imageReport = ImageReport::findOrFail($id);
+        $imageReport = ImageReport::find($id);
+        if(!isset($imageReport)) return $this->error("Not found", Response::HTTP_NOT_FOUND);
 
         $imageReport->update([
             'approved' => $validator->validated()['approve']
@@ -402,17 +482,84 @@ class ImageReportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
+    /**
+     * @OA\Delete(
+     *      path="/destroy-image-report/{id}",
+     *      operationId="destroyReport",
+     *      tags={"Reports"},
+     *      summary="Destroy report",
+     *      description="Destroy report",
+     * 
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="Report ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent()
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     *     )
+     */
     public function destroy($id)
     {
-        $imageReport = ImageReport::findOrFail($id);
+        $imageReport = ImageReport::withTrashed()->whereId($id)->first();
+        if(!isset($imageReport)) return $this->error("Not found", Response::HTTP_NOT_FOUND);
         $imageReport->forceDelete();
 
         return $this->success([], "image destroyed");
     }
 
+    /**
+     * @OA\Delete(
+     *      path="/archive-image-report/{id}",
+     *      operationId="arhiveReport",
+     *      tags={"Reports"},
+     *      summary="Archive report",
+     *      description="Archive report",
+     * 
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="Report ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent()
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     *     )
+     */
     public function archive($id)
     {
         $imageReport = ImageReport::find($id);
+        if(!isset($imageReport)) return $this->error("Not found", Response::HTTP_NOT_FOUND);
         $imageReport->delete();
 
         return $this->success([], "image archived");

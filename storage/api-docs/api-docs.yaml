@@ -1,0 +1,311 @@
+openapi: 3.0.0
+info:
+  title: 'Laravel OpenApi Demo Documentation'
+  description: 'L5 Swagger OpenApi description'
+  contact:
+    email: admin@admin.com
+  license:
+    name: 'Apache 2.0'
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost/api/'
+    description: 'Demo API Server'
+paths:
+  /reports:
+    get:
+      tags:
+        - Reports
+      summary: 'Get list of reports'
+      description: 'Returns list of reports'
+      operationId: getReportsList
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResource'
+        401:
+          description: Unauthenticated
+        403:
+          description: Forbidden
+  /report-image:
+    post:
+      tags:
+        - Reports
+      summary: 'Create new report'
+      description: 'Create new report'
+      operationId: createReport
+      parameters:
+        -
+          name: user_id
+          in: query
+          description: 'User ID'
+          required: true
+          schema:
+            type: integer
+        -
+          name: image
+          in: query
+          description: 'The image to be reported (the link or byte)'
+          required: true
+          schema:
+            type: string
+        -
+          name: callback
+          in: query
+          description: "The Callback endpoint use to send report result when it's available"
+          required: false
+          schema:
+            type: url
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageReport'
+        401:
+          description: Unauthenticated
+        403:
+          description: Forbidden
+  '/reevaluate-report/{id}':
+    get:
+      tags:
+        - Reports
+      summary: 'Revaluate existing report'
+      description: 'Revaluate existing report'
+      operationId: revaluateReport
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Report ID'
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageReport'
+        401:
+          description: Unauthenticated
+        403:
+          description: Forbidden
+  '/approve-report/{id}':
+    put:
+      tags:
+        - Reports
+      summary: 'Approve report'
+      description: 'Approve report'
+      operationId: approveReport
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Report ID'
+          required: true
+          schema:
+            type: integer
+        -
+          name: approve
+          in: query
+          description: 'approval value'
+          required: true
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageReport'
+        401:
+          description: Unauthenticated
+        403:
+          description: Forbidden
+  '/destroy-image-report/{id}':
+    delete:
+      tags:
+        - Reports
+      summary: 'Destroy report'
+      description: 'Destroy report'
+      operationId: destroyReport
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Report ID'
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema: []
+        401:
+          description: Unauthenticated
+        403:
+          description: Forbidden
+  '/archive-image-report/{id}':
+    delete:
+      tags:
+        - Reports
+      summary: 'Archive report'
+      description: 'Archive report'
+      operationId: arhiveReport
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Report ID'
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema: []
+        401:
+          description: Unauthenticated
+        403:
+          description: Forbidden
+components:
+  schemas:
+    StoreImageReportRequest:
+      title: 'Store Image Report request'
+      description: 'Store Image Report request body data'
+      required:
+        - user_id
+        - image
+      properties:
+        user_id:
+          title: user_id
+          description: 'ID of the user who send report'
+          type: string
+          example: '1'
+        image:
+          title: image
+          description: 'The image to be reported (the link or byte)'
+          type: string
+          example: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3FX_qrHfguSoEBB293hEFgrd1rPOdTSLY2Q&usqp=CAU'
+        callback:
+          title: callback
+          description: "The Callback endpoint use to send report result when it's available"
+          type: string
+          example: 'http://127.0.0.1/api/callback'
+      type: object
+    ReportResource:
+      title: ReportResource
+      description: 'Report resource'
+      properties:
+        data:
+          title: Data
+          description: 'Data wrapper'
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageReport'
+      type: object
+      xml:
+        name: ReportResource
+    ImageReport:
+      title: ImageReport
+      description: 'ImageReport model'
+      properties:
+        id:
+          title: ID
+          description: 'ImageReport ID'
+          type: integer
+          format: int64
+          example: 1
+        user_id:
+          title: 'User ID'
+          description: 'User ID'
+          type: integer
+          format: int64
+          example: 1
+        image:
+          title: Image
+          description: 'Image link or byte'
+          type: string
+          example: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3FX_qrHfguSoEBB293hEFgrd1rPOdTSLY2Q&usqp=CAU'
+        callback:
+          title: Callback
+          description: "The Callback endpoint use to send report result when it's available"
+          example: 'http://127.0.0.1/api/reports'
+        adult:
+          title: Adult
+          description: 'The adult probability'
+          type: string
+          example: UNLIKELY
+        spoof:
+          title: spoof
+          description: 'The spoof probability'
+          type: string
+          example: UNLIKELY
+        medical:
+          title: medical
+          description: 'The medical probability'
+          type: string
+          example: UNLIKELY
+        violence:
+          title: violence
+          description: 'The violence probability'
+          type: string
+          example: UNLIKELY
+        racy:
+          title: racy
+          description: 'The racy probability'
+          type: string
+          example: UNLIKELY
+        approved:
+          title: approved
+          description: 'Show if the report is approved or not'
+          type: string
+          example: true
+        evaluated:
+          title: evaluated
+          description: 'Show if the report is evaluated or not'
+          type: string
+          example: false
+        probability:
+          title: probability
+          description: 'Show the probability of image to be a sensitive content'
+          type: string
+          example: HIGH
+        created_at:
+          title: 'Created at'
+          description: 'Created at'
+          type: string
+          format: datetime
+          example: '2022-09-06 17:50:45'
+        updated_at:
+          title: 'Updated at'
+          description: 'Updated at'
+          type: string
+          format: datetime
+          example: '2022-09-06 17:50:45'
+        deleted_at:
+          title: 'Deleted at'
+          description: 'Deleted at'
+          type: string
+          format: datetime
+          example: '2022-09-06 17:50:45'
+      type: object
+      xml:
+        name: ImageReport
+tags:
+  -
+    name: Reports
+    description: 'API Endpoints of Reports'
