@@ -49,7 +49,7 @@ if apache2 is running on port 80 run ```sudo service apache2 stop``` before retr
 **_Now your application is available on http://localhost_**
 # **API Routes**
 ### All API routes with Schema and examples are available on http://localhost/api/docs
-![API documentation](public/swagger.png?raw=true "How API documentation is look")
+![API documentation](public/swagger2.png?raw=true "How API documentation is look")
 <br>
 <br>
 ===>**Just click on try it to test any route**
@@ -64,8 +64,8 @@ The UI is directly available on http://localhost, i have build it with vue.js 3 
 - On the APPROVED column,  the green color means that the image report was approved; the red color means was rejected, the gray color means that the report was not moderated and you also have the label indicator
 - On the ACTIONS column, you can hit the check icon to approve or reject the Image Report; you can hit the archive icon to archive the report; and you can revaluate the report by hit refresh icon
 - Sort reports by decreasing probability of containing sensitive by clicking on **probability** column header
-
-![Example Reports list](public/reports_list.png?raw=true "Example Reports list sort by decreasing probability")
+- Submit new image manually by cliking on **Add New** button
+![Example Reports list](public/report-list-2.png?raw=true "Example Reports list sort by decreasing probability")
 
 ## Callback
 

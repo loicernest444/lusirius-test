@@ -28,6 +28,13 @@
               ></path>
             </svg>
           </button>
+          <!-- Add new -->
+          <button
+            @click.prevent="showAddNewModal = true"
+            class="ml-3 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >
+            Add new
+          </button>
           <!-- Dropdown menu -->
           <div
             id="dropdownAction"
@@ -477,11 +484,13 @@
         </template>
       </Modal>
     </div>
+    <AddNewModal v-if="showAddNewModal" @close="showAddNewModal = false"></AddNewModal>
   </div>
 </template>
 
 <script>
 import Modal from "./Modal.vue";
+import AddNewModal from "./AddNewModal.vue";
 import LoadingButton from "./LoadingButton.vue";
 import { mapMutations } from "vuex";
 export default {
@@ -501,6 +510,7 @@ export default {
       isLoadingReject: false,
       showRevaluationModal: false,
       showImageModal: false,
+      showAddNewModal: false,
       isLoadingArchive: false,
       error: "",
     };
@@ -508,6 +518,7 @@ export default {
   components: {
     Modal,
     LoadingButton,
+    AddNewModal,
   },
   computed: {
     getAllReports() {

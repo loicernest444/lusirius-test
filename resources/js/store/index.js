@@ -54,6 +54,17 @@ export default {
         // .catch((err) => {
         //   return err
         // });
+       },
+       async reportImage({ commit }, payload){
+        return await axios
+        .post(`/api/report-image`, payload)
+        // .then((response) => {
+        //     context.commit("ADD_REPORT", response.data.data)
+        //     return response
+        // })
+        // .catch((err) => {
+        //   return err
+        // });
        }
 	},
 
@@ -78,6 +89,9 @@ export default {
       },
       SORT_REPORTS(state){
         state.reports = state.reports.sort((a,b) => b.probability_level - a.probability_level)
+      },
+      ADD_REPORT(state, report){
+        state.reports.unshift(report)
       }
 	}
 }
