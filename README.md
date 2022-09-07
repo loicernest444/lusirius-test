@@ -49,6 +49,12 @@ if apache2 is running on port 80 run ```sudo service apache2 stop``` before retr
 **_Now your application is available on http://localhost_**
 # **API Routes**
 ### All API routes with Schema and examples are available on http://localhost/api/docs
+![API documentation](public/swagger.png?raw=true "How API documentation is look")
+<br>
+<br>
+===>**Just click on try it to test any route**
+<br>
+<br>
 
 # **UI usage**
 The UI is directly available on http://localhost, i have build it with vue.js 3 and vuex. In the UI you have only one page where you can see the list of reports. 

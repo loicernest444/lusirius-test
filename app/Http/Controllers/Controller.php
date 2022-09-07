@@ -10,10 +10,10 @@ use Illuminate\Routing\Controller as BaseController;
 /**
      * @OA\Info(
      *      version="1.0.0",
-     *      title="Laravel OpenApi Demo Documentation",
-     *      description="L5 Swagger OpenApi description",
+     *      title="LUSIRIUS TEST Documentation",
+     *      description="API Documentation",
      *      @OA\Contact(
-     *          email="admin@admin.com"
+     *          email="viryl1515@gmail.com"
      *      ),
      *      @OA\License(
      *          name="Apache 2.0",
@@ -29,7 +29,7 @@ use Illuminate\Routing\Controller as BaseController;
      *
      * @OA\Tag(
      *     name="Reports",
-     *     description="API Endpoints of Reports"
+     *     description="API Endpoints of Image Reports"
      * )
      */
 class Controller extends BaseController
