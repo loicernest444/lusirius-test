@@ -75,6 +75,9 @@ export default {
         if (index >= 0) {
             state.reports.splice(index, 1, $report);
         }
+      },
+      SORT_REPORTS(state){
+        state.reports = state.reports.sort((a,b) => b.probability_level - a.probability_level)
       }
 	}
 }

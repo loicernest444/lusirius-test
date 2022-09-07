@@ -120,7 +120,13 @@
               </div>
             </th>
             <th scope="col" class="py-3 px-6">Image</th>
-            <th scope="col" class="py-3 px-6">probability</th>
+            <th
+              @click="$store.commit('SORT_REPORTS')"
+              scope="col"
+              class="py-3 px-6 cursor-pointer"
+            >
+              probability
+            </th>
             <th scope="col" class="py-3 px-6">Adult</th>
             <th scope="col" class="py-3 px-6">Spoof</th>
             <th scope="col" class="py-3 px-6">medical</th>
@@ -161,7 +167,7 @@
             <td class="py-4 px-6">
               <div class="flex flex-col">
                 <div>{{ report.probability }}</div>
-                <div>{{ report.probability_level }}</div>
+                <div>{{ report.probability_level * 100 + "%" }}</div>
               </div>
             </td>
             <td class="py-4 px-6">

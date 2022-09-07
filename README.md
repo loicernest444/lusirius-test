@@ -6,11 +6,12 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-# Deployment
+# **Deployment**
 
-## Prerequisites
+## **Prerequisites**
 - install composer
 - install Docker-compose in your linux distro
+- If you don't have the JSON keyfile, activate Cloud vision in your google account and create new key for the project, download it and copy it as key.json into project root directory.
 
 To deploy the project, run commands below in the project root directory.<br>
 PS: you can create "sail" alias
@@ -32,28 +33,27 @@ $ ./vendor/bin/sail artisan migrate
 ```php
 $ ./vendor/bin/sail npm run dev
 ```
+to generate swagger documentation:
+```php
+$ ./vendor/bin/sail artisan l5-swagger:generate
+```
 to build and run containers execute:
 ```php
 $ ./vendor/bin/sail up
 ```
 if apache2 is running on port 80 run ```sudo service apache2 stop``` before retry
 
-**_Now your application is available in http://localhost_**
+**_Now your application is available on http://localhost_**
 # **API Routes**
-### **1. http://127.0.0.1/api/reports**
-That is the route to fetch all image reports with <b>GET</b> method
+### All API routes with Schema and examples are available on http://localhost/api/docs
 
+## **UI usage**
+The UI is directly available on http://localhost, i have build it with vue.js 3 and vuex. In the UI you have only one page where you can see the list of reports. 
+- Preview the reported image by clicking on it
+- On the probability column you have the probability of containing sensitive content
+- On the EVALUATED column, the green color means that the image report was evaluated and the red color means was not
+- On the APPROVED column,  the green color means that the image report was approved; the red color means was rejected, the gray color means that the report was not moderated and you also have the label indicator
+- On the ACTIONS column, you can hit the check icon to approve or reject the Image Report; you can hit the archive icon tout archive the report; and you can revaluate the report by hit refresh icon
+- Sort reports by decreasing probability of containing sensitive by clicking on **probability** column header
 
-### **2. http://127.0.0.1/report-image**
-That is the route to report and image reports with <b>POST</b> method
-
-### **3. API route http://127.0.0.1/api/{something}**
-This api route is use to send sthg datas for updating
-- Example :
-```json
-{
-  "id": 2,
-  "password": "720DF6C2482218518FA20FDC52D4DED7ECC043AB",
-  "comments": "Json test"
-}
-```
+![Example Reports list](public/reports_list.png?raw=true "Example Reports list sort by decreasing probability")
