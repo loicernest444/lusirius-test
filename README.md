@@ -10,7 +10,7 @@
 
 ## **Prerequisites**
 - install composer
-- install Docker-compose in your linux distro
+- install Docker-compose in your linux distribution
 - If you don't have the JSON keyfile, activate Cloud vision in your google account and create new key for the project, download it and copy it as key.json into project root directory.
 
 To deploy the project, run commands below in the project root directory.<br>
@@ -62,7 +62,7 @@ The UI is directly available on http://localhost, i have build it with vue.js 3 
 - On the probability column you have the probability of containing sensitive content
 - On the EVALUATED column, the green color means that the image report was evaluated and the red color means was not
 - On the APPROVED column,  the green color means that the image report was approved; the red color means was rejected, the gray color means that the report was not moderated and you also have the label indicator
-- On the ACTIONS column, you can hit the check icon to approve or reject the Image Report; you can hit the archive icon tout archive the report; and you can revaluate the report by hit refresh icon
+- On the ACTIONS column, you can hit the check icon to approve or reject the Image Report; you can hit the archive icon to archive the report; and you can revaluate the report by hit refresh icon
 - Sort reports by decreasing probability of containing sensitive by clicking on **probability** column header
 
 ![Example Reports list](public/reports_list.png?raw=true "Example Reports list sort by decreasing probability")
